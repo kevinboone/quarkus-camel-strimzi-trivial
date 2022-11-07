@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--======================================================================
+ 
+  camel-routes.xml 
+
+  This file is included at run time by matching a pattern specified in 
+  application.properties. The name is not significant, so long as it
+  matches the pattern.
+
+  Tokens of the form {{xxx.yyy}} are placeholders, that are substituted
+  from values in application.properties, or from environment variables.
+
+  Copyright (c)2022 Kevin Boone, GPL v3.0
+
+=======================================================================-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://camel.apache.org/schema/spring"
+        xsi:schemaLocation="
+            http://camel.apache.org/schema/spring
+            https://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <route id="kafka_to_log" autoStartup="true">
+
+  <from uri="kafka:{{kafka.topic}}?brokers={{kafka.bootstrap.url}}&amp;securityProtocol={{kafka.security.protocol}}&amp;sslTrustStoreLocation=./truststore.p12&amp;sslTrustStorePassword={{kafka.truststore.password}}&amp;sslEndpointAlgorithm=none&amp;saslJaasConfig={{kafka.saslJaasConfig}}&amp;saslMechanism={{kafka.sasl.mechanism}}"/>
+    <to uri="log://from_kafka"/>
+    <!-- Note that the quarkus-camel-bean dependency is needed to 
+         handle log messages that contain expressions -->
+    <log message="Partition=${headers[kafka.PARTITION]}" />
+    <log message="Key=${headers[kafka.KEY]}" />
+    <log message="Offset=${headers[kafka.OFFSET]}" />
+
+  </route>
+
+</routes>
+
